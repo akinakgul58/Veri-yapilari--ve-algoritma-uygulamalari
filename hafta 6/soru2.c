@@ -1,44 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Node {
-    int data;
-    struct Node* left;
-    struct Node* right;
-} Node;
+typedef struct Dugum {
+    int deger;
+    struct Dugum *sol;
+    struct Dugum *sag;
+} Dugum;
 
-Node* insert(Node* root, int value) {
-    if (root == NULL) {
-        Node* n = (Node*)malloc(sizeof(Node));
-        n->data = value;
-        n->left = n->right = NULL;
-        return n;
+Dugum *yeniDugum(int deger) {
+    Dugum *d = (Dugum *)malloc(sizeof(Dugum));
+    if (d == NULL) {
+        printf("Bellek ayrilamadi!\n");
+        exit(1);
     }
-    if (value < root->data)
-        root->left = insert(root->left, value);
-    else if (value > root->data)
-        root->right = insert(root->right, value);
-    return root;
+    d->deger = deger;
+    d->sol = NULL;
+    d->sag = NULL;
+    return d;
 }
 
-int search(Node* root, int value) {
-    if (root == NULL)
+Dugum *insert(Dugum *kok, int deger) {
+    if (kok == NULL)
+        return yeniDugum(deger);
+
+    if (deger < kok->deger)
+        kok->sol = insert(kok->sol, deger);
+    else if (deger > kok->deger)
+        kok->sag = insert(kok->sag, deger);
+
+    return kok;
+}
+
+
+int search(Dugum *kok, int deger) {
+    if (kok == NULL)
         return 0;
-    if (value == root->data)
+    if (deger == kok->deger)
         return 1;
-    if (value < root->data)
-        return search(root->left, value);
-    return search(root->right, value);
+    if (deger < kok->deger)
+        return search(kok->sol, deger);
+    return search(kok->sag, deger);
 }
 
-int findMin(Node* root) {
-    while (root->left != NULL)
-        root = root->left;
-    return root->data;
+
+int findMin(Dugum *kok) {
+    while (kok->sol != NULL)
+        kok = kok->sol;
+    return kok->deger;
 }
 
-int main() {
-    Node* root = NULL;
+void temizle(Dugum *kok) {
+    if (kok == NULL)
+        return;
+    temizle(kok->sol);
+    temizle(kok->sag);
+    free(kok);
+}
+
+int main(void) {
+    Dugum *root = NULL;
     int numbers[] = {40, 20, 60, 10, 30, 50, 70};
     for (int i = 0; i < 7; i++)
         root = insert(root, numbers[i]);
@@ -56,5 +76,6 @@ int main() {
     if (root != NULL)
         printf("En kucuk eleman: %d\n", findMin(root));
 
+    temizle(root);
     return 0;
 }
